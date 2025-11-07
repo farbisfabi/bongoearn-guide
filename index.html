@@ -1,0 +1,302 @@
+<!-- 
+BongoEarn: আন্তর্জাতিক উপার্জন নির্দেশিকা
+এই ফাইলটিতে সম্পূর্ণ HTML, CSS (Tailwind) এবং JavaScript রয়েছে। 
+এটি একটি স্ট্যাটিক সাইট হিসেবে Netlify/Vercel-এ দ্রুত লোড হওয়ার জন্য তৈরি করা হয়েছে।
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BongoEarn - আন্তর্জাতিক উপার্জনের পথ</title>
+    <!-- Tailwind CSS লোড করা হচ্ছে -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Google Fonts: শুধুমাত্র Tiro Bangla ফন্ট লোড করা হচ্ছে */
+        @import url('https://fonts.googleapis.com/css2?family=Tiro+Bangla:wght@400;700&display=swap');
+        
+        /* প্রাথমিক ফন্ট সেটআপ: সাইটের সমস্ত টেক্সট এখন Tiro Bangla ব্যবহার করবে */
+        body {
+            font-family: 'Tiro Bangla', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        /* হেডিংগুলোও একই ফন্ট ব্যবহার করবে */
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Tiro Bangla', sans-serif;
+        }
+
+        /* কাস্টম স্টাইল ফর গুগল ট্রান্সলেট */
+        .goog-te-gadget-simple {
+            background-color: transparent !important;
+            border: none !important;
+        }
+        .goog-te-gadget-icon {
+            display: none !important;
+        }
+        .goog-te-gadget-simple span {
+            color: inherit !important;
+        }
+    </style>
+    <!-- Google Translate Script -->
+    <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'bn', 
+                includedLanguages: 'en',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // enable dark mode for class toggle
+            theme: {
+                extend: {
+                    colors: {
+                        'bongo-primary': '#10b981', // Emerald 500
+                        'bongo-dark': '#0f172a', // Slate 900
+                        'bongo-light': '#f8fafc', // Slate 50
+                    }
+                }
+            }
+        }
+
+        // --- JavaScript Logic ---
+        
+        // ফাংশন: থিম টগল
+        function toggleTheme() {
+            const isDarkMode = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            updateThemeButton(isDarkMode);
+        }
+
+        // ফাংশন: থিম বাটন আপডেট করা
+        function updateThemeButton(isDarkMode) {
+            const button = document.getElementById('theme-toggle');
+            if (button) {
+                if (isDarkMode) {
+                    button.innerHTML = '🌞 লাইট মোড';
+                } else {
+                    button.innerHTML = '🌙 ডার্ক মোড';
+                }
+            }
+        }
+
+        // ফাংশন: কন্টেন্ট লোড করা
+        async function loadContent(filepath) {
+            const contentDisplay = document.getElementById('content-display');
+            const introSection = document.getElementById('intro-section');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            
+            // লোডিং শুরু
+            contentDisplay.innerHTML = ''; // পুরোনো কন্টেন্ট পরিষ্কার
+            loadingIndicator.classList.remove('hidden');
+
+            try {
+                // Fetch MD file
+                const response = await fetch(filepath);
+                
+                if (!response.ok) {
+                    throw new Error(`Error fetching content: ${response.statusText}`);
+                }
+                
+                const markdownText = await response.text();
+                
+                // এখানে Markdown to HTML কনভার্ট করতে হবে। 
+                // যেহেতু আমরা বাইরের লাইব্রেরি ব্যবহার করতে পারি না, তাই একটি মৌলিক কনভার্টার ব্যবহার করব।
+                const htmlContent = convertMarkdownToHtml(markdownText);
+                
+                contentDisplay.innerHTML = htmlContent;
+
+                // কন্টেন্ট লোড হলে ইন্ট্রো সেকশন হাইড করা যেতে পারে 
+                // introSection.classList.add('hidden'); // অথবা শুধু স্ক্রোল করা
+                contentDisplay.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (error) {
+                console.error("Content loading failed:", error);
+                contentDisplay.innerHTML = `<div class="p-6 text-red-500 bg-red-100 dark:bg-red-900 dark:text-red-300 rounded-lg">দুঃখিত, কন্টেন্ট লোড করা যায়নি: ${error.message}</div>`;
+            } finally {
+                // লোডিং শেষ
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+
+        // ফাংশন: মৌলিক Markdown থেকে HTML রূপান্তর (হেডিং, প্যারাগ্রাফ, তালিকা)
+        function convertMarkdownToHtml(md) {
+            let html = md;
+            
+            // হেডিং (H1 to H6)
+            html = html.replace(/^###### (.*$)/gim, '<h6>$1</h6>');
+            html = html.replace(/^##### (.*$)/gim, '<h5>$1</h5>');
+            html = html.replace(/^#### (.*$)/gim, '<h4>$1</h4>');
+            html = html.replace(/^### (.*$)/gim, '<h3 class="text-2xl font-semibold mt-6 mb-3 font-heading">$1</h3>');
+            html = html.replace(/^## (.*$)/gim, '<h2 class="text-3xl font-bold mt-8 mb-4 font-heading border-b pb-2">$1</h2>');
+            html = html.replace(/^# (.*$)/gim, '<h1 class="text-4xl font-extrabold mt-10 mb-5 font-heading">$1</h1>');
+
+            // বোল্ড এবং ইটালিক
+            html = html.replace(/\*\*(.*?)\*\*/gim, '<strong>$1</strong>');
+            html = html.replace(/\*(.*?)\*/gim, '<em>$1</em>');
+
+            // লাইন ব্রেক/প্যারাগ্রাফ
+            html = html.replace(/\n\n/g, '</p><p>');
+            
+            // তালিকা (সাধারণ বুলেট পয়েন্ট)
+            html = html.replace(/^\* (.*$)/gim, '<li class="ml-5 list-disc">$1</li>');
+            html = html.replace(/<\/p><li/g, '<li'); // ফিক্স: তালিকা শুরু হওয়ার আগে অপ্রয়োজনীয় </p> সরানো
+            html = html.replace(/<\/li><p>/g, '</li>'); // ফিক্স: তালিকা শেষ হওয়ার পর অপ্রয়োজনীয় <p> সরানো
+            
+            // টেবিল (খুবই মৌলিক - ব্লকে ঢোকানোর জন্য)
+            // এটি একটি মৌলিক রূপান্তর, টেবিলকে সঠিকভাবে HTML এ আনতে আরও জটিল লজিক প্রয়োজন,
+            // কিন্তু বর্তমানে এটি কনটেন্টকে দেখানোর জন্য যথেষ্ট।
+            html = html.replace(/\|([^|]+)\|/g, '<td>$1</td>');
+            html = html.replace(/\|/g, ''); 
+            
+            // চূড়ান্ত প্যারাগ্রাফ ট্যাগিং
+            html = `<p>${html}</p>`;
+            html = html.replace(/<p><h/g, '<h').replace(/<\/h><p>/g, '</h4>').replace(/<p><li/g, '<ul><li').replace(/<\/li><p>/g, '</li></ul>');
+
+            // অতিরিক্ত ফাঁকা <p> ট্যাগ সরান
+            html = html.replace(/<p><\/p>/g, '');
+            html = html.replace(/<\/p><ul>/g, '<ul>');
+
+            // ব্লককোট
+            html = html.replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-bongo-primary pl-4 italic my-4 bg-gray-50 dark:bg-gray-700 p-3 rounded-r-lg">$1</blockquote>');
+            
+            return html;
+        }
+
+        // ইভেন্ট লিসেনার সেটআপ
+        window.onload = function() {
+            // ১. থিম লোড করা
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            let isDarkMode = false;
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.documentElement.classList.add('dark');
+                isDarkMode = true;
+            }
+            updateThemeButton(isDarkMode);
+
+            // ২. ইভেন্ট লিসেনার যোগ করা
+            document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+            // ৩. কার্ড ক্লিক ইভেন্ট লিসেনার যোগ করা
+            const cards = document.querySelectorAll('.guide-card');
+            cards.forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const filepath = card.getAttribute('data-filepath');
+                    if (filepath) {
+                        loadContent(filepath);
+                    }
+                });
+            });
+        };
+    </script>
+</head>
+
+<body class="bg-bongo-light text-bongo-dark dark:bg-bongo-dark dark:text-bongo-light min-h-screen">
+
+    <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+
+        <!-- Header/Navigation Bar -->
+        <header class="flex flex-col sm:flex-row justify-between items-center pb-4 border-b border-gray-200 dark:border-gray-700 mb-8">
+            <div class="flex items-center space-x-4">
+                <h1 class="text-4xl font-extrabold text-bongo-primary font-heading tracking-tight">BongoEarn</h1>
+                <span class="text-sm text-gray-500 dark:text-gray-400 hidden md:inline">| আন্তর্জাতিক উপার্জনের সঠিক গাইডলাইন</span>
+            </div>
+            
+            <nav class="flex items-center space-x-3 mt-4 sm:mt-0">
+                <!-- থিম টগল বাটন -->
+                <button id="theme-toggle" class="px-3 py-1.5 text-sm font-semibold rounded-full transition-colors duration-200 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600">
+                    🌙 ডার্ক মোড
+                </button>
+                
+                <!-- Google Translate Dropdown -->
+                <div id="google_translate_element" class="text-sm"></div>
+            </nav>
+        </header>
+
+        <!-- Intro/Hero Section -->
+        <section id="intro-section" class="text-center mb-12 p-6 rounded-xl shadow-lg bg-white dark:bg-gray-800 border border-bongo-primary/50">
+            <h2 class="text-3xl sm:text-4xl font-bold mb-4 text-gray-800 dark:text-gray-100 font-heading">
+                বাংলাদেশ থেকে ডলার উপার্জনের সম্পূর্ণ পথ
+            </h2>
+            <p class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+                আপনার স্মার্টফোন বা কম্পিউটার ব্যবহার করে, আন্তর্জাতিক সার্ভে ও মাইক্রো টাস্কের মাধ্যমে কীভাবে বৈধভাবে অর্থ উপার্জন করবেন, তার A to Z নির্দেশিকা। প্রক্সি সেটআপ থেকে শুরু করে বিকাশে টাকা উত্তোলন পর্যন্ত—সবকিছু এখানে।
+            </p>
+        </section>
+
+        <!-- 5-Step Guide Grid -->
+        <section id="guide-grid" class="mb-12">
+            <h3 class="text-2xl font-bold mb-6 border-l-4 border-bongo-primary pl-3 font-heading text-gray-700 dark:text-gray-200">
+                ধাপে ধাপে আপনার উপার্জনের যাত্রা
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+
+                <!-- ধাপ ১: পরিবেশ প্রস্তুতি -->
+                <a href="#" class="guide-card p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition duration-300 border-t-4 border-blue-500 cursor-pointer" data-filepath="setup_guide.md">
+                    <span class="text-3xl font-bold text-blue-500 font-heading">১</span>
+                    <h4 class="text-xl font-semibold mt-2 mb-1 font-heading">পরিবেশ প্রস্তুতি</h4>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">ব্রাউজার সেটিংস, VPN/Proxy নির্বাচন ও IP নিরাপত্তা।</p>
+                </a>
+
+                <!-- ধাপ ২: সফল প্রোফাইল তৈরি -->
+                <a href="#" class="guide-card p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition duration-300 border-t-4 border-yellow-500 cursor-pointer" data-filepath="profile_mastery.md">
+                    <span class="text-3xl font-bold text-yellow-500 font-heading">২</span>
+                    <h4 class="text-xl font-semibold mt-2 mb-1 font-heading">প্রোফাইল মাস্টারী</h4>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">স্ক্রিন-আউট এড়িয়ে যাওয়ার কৌশল ও সঠিক প্রোফাইল নির্মাণ।</p>
+                </a>
+
+                <!-- ধাপ ৩: নির্ভরযোগ্য সাইট নির্বাচন -->
+                <a href="#" class="guide-card p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition duration-300 border-t-4 border-green-500 cursor-pointer" data-filepath="reliable_sites.md">
+                    <span class="text-3xl font-bold text-green-500 font-heading">৩</span>
+                    <h4 class="text-xl font-semibold mt-2 mb-1 font-heading">সাইট রিভিউ</h4>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">বাংলাদেশী পেমেন্ট সাপোর্ট করে এমন সেরা সাইটগুলোর তালিকা।</p>
+                </a>
+
+                <!-- ধাপ ৪: টাকা উত্তোলন ও হিসাব -->
+                <a href="#" class="guide-card p-5 bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition duration-300 border-t-4 border-red-500 cursor-pointer" data-filepath="payout_management.md">
+                    <span class="text-3xl font-bold text-red-500 font-heading">৪</span>
+                    <h4 class="text-xl font-semibold mt-2 mb-1 font-heading">উত্তোলন কৌশল</h4>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Payoneer/PayPal/ACH এর মাধ্যমে নিরাপদে পেমেন্ট গ্রহণ।</p>
+                </a>
+
+                <!-- ধাপ ৫: টুলস ও অ্যাডভান্সড সাপোর্ট (বিজনেস সেকশন) -->
+                <a href="#" class="guide-card p-5 bg-bongo-primary text-white rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition duration-300 border-t-4 border-bongo-primary cursor-pointer" data-filepath="tools_and_support.md">
+                    <span class="text-3xl font-bold font-heading">৫</span>
+                    <h4 class="text-xl font-semibold mt-2 mb-1 font-heading">প্রো টুলস ও সাপোর্ট</h4>
+                    <p class="text-sm opacity-90">আমাদের প্রক্সি, ভিপিএস কিনুন এবং গিফট কার্ড/ACH ক্যাশ আউট করুন।</p>
+                </a>
+            </div>
+        </section>
+
+        <!-- Dynamic Content Display Area -->
+        <section id="content-area" class="mt-12">
+            <div id="loading-indicator" class="hidden text-center p-6 bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200 rounded-lg shadow-inner">
+                <p class="font-semibold text-lg">অনুগ্রহ করে অপেক্ষা করুন... কন্টেন্ট লোড হচ্ছে।</p>
+            </div>
+            
+            <article id="content-display" class="p-6 md:p-10 bg-white dark:bg-gray-800 rounded-xl shadow-2xl min-h-[400px]">
+                <h2 class="text-xl font-heading font-bold text-gray-700 dark:text-gray-200">
+                    শুরু করার জন্য একটি ধাপ নির্বাচন করুন
+                </h2>
+                <p class="mt-4 text-gray-500 dark:text-gray-400">
+                    উপরে দেওয়া ৫টি ধাপের যেকোনো একটি কার্ডে ক্লিক করে আপনার উপার্জনের যাত্রা শুরু করুন। প্রতিটি গাইডলাইন আপনাকে আন্তর্জাতিক বাজারে সফল হতে সাহায্য করবে।
+                </p>
+            </article>
+        </section>
+
+        <!-- Footer -->
+        <footer class="mt-12 pt-6 border-t border-gray-200 dark:border-gray-700 text-center text-sm text-gray-500 dark:text-gray-400">
+            <p>&copy; 2025 BongoEarn. সমস্ত অধিকার সংরক্ষিত।</p>
+            <p class="mt-1">
+                <a href="#" class="hover:text-bongo-primary transition-colors">যোগাযোগ</a> | 
+                <a href="#" class="hover:text-bongo-primary transition-colors">ব্যবহারের শর্তাবলী</a>
+            </p>
+        </footer>
+    </div>
+
+</body>
+</html>
